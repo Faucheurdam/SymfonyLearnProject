@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des tâches{% endblock %}
+
+{% block body %}
+    <h1>Liste des tâches</h1>
+
+    <p>
+        <a href="{{ path('app_task_new') }}">Créer une tâche</a>
+    </p>
+
+    {% if tasks is empty %}
+        <p>Aucune tâche pour le moment.</p>
+    {% else %}
+        <ul>
+            {% for task in tasks %}
+                <li>
+                    <strong>{{ task.title }}</strong>
+                    {% if task.description %}
+                        <br>
+                        {{ task.description }}
+                    {% endif %}
+                    <br>
+                    Statut :
+                    {% if task.isDone %}
+                        Terminée
+                    {% else %}
+                        En cours
+                    {% endif %}
+                    <br>
+                    Créée le : {{ task.createdAt|date('d/m/Y H:i') }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}
