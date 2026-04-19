@@ -34,6 +34,17 @@
                         En cours
                     {% endif %}
 
+                    <form method="post" action="{{ path('app_task_toggle', {id: task.id}) }}" style="display:inline;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('toggle_task_' ~ task.id) }}">
+                        <button type="submit">
+                            {% if task.isDone %}
+                                Marquer comme en cours
+                            {% else %}
+                                Marquer comme terminée
+                            {% endif %}
+                        </button>
+                    </form>
+
                     <br>
                     Créée le : {{ task.createdAt|date('d/m/Y H:i') }}
 

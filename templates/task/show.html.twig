@@ -21,6 +21,17 @@
         {% endif %}
     </p>
 
+    <form method="post" action="{{ path('app_task_toggle', {id: task.id}) }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('toggle_task_' ~ task.id) }}">
+        <button type="submit">
+            {% if task.isDone %}
+                Marquer comme en cours
+            {% else %}
+                Marquer comme terminée
+            {% endif %}
+        </button>
+    </form>
+
     <p><strong>Créée le :</strong> {{ task.createdAt|date('d/m/Y H:i') }}</p>
 
     <p>

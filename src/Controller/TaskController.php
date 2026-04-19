@@ -16,7 +16,7 @@ final class TaskController extends AbstractController
     #[Route('/tasks', name: 'app_task_index')]
     public function index(TaskRepository $taskRepository): Response
     {
-        $tasks = $taskRepository->findAll();
+        $tasks = $taskRepository->findBy([], ['createdAt' => 'DESC']);
 
         return $this->render('task/index.html.twig', [
             'tasks' => $tasks,
@@ -102,6 +102,27 @@ final class TaskController extends AbstractController
         $entityManager->flush();
 
         $this->addFlash('success', 'La tâche a bien été supprimée.');
+
+        return $this->redirectToRoute('app_task_index');
+    }
+
+    #[Route('/tasks/{id}/toggle', name: 'app_task_toggle', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function toggle(int $id, Request $request, TaskRepository $taskRepository, EntityManagerInterface $entityManager): Response
+    {
+        $task = $taskRepository->find($id);
+
+        if (!$task) {
+            throw $this->createNotFoundException('Tâche introuvable.');
+        }
+
+        if (!$this->isCsrfTokenValid('toggle_task_'.$task->getId(), (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Jeton CSRF invalide.');
+        }
+
+        $task->setIsDone(!$task->isDone());
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Le statut de la tâche a bien été mis à jour.');
 
         return $this->redirectToRoute('app_task_index');
     }
