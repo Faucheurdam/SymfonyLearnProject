@@ -3,6 +3,10 @@
 {% block title %}Liste des tâches{% endblock %}
 
 {% block body %}
+    {% for message in app.flashes('success') %}
+        <div>{{ message }}</div>
+    {% endfor %}
+
     <h1>Liste des tâches</h1>
 
     <p>

@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\TaskRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TaskRepository::class)]
 class Task
@@ -15,9 +16,20 @@ class Task
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Le titre est obligatoire.')]
+    #[Assert\Length(
+        min: 3,
+        max: 255,
+        minMessage: 'Le titre doit contenir au moins {{ limit }} caractères.',
+        maxMessage: 'Le titre ne doit pas dépasser {{ limit }} caractères.'
+    )]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\Length(
+        max: 2000,
+        maxMessage: 'La description ne doit pas dépasser {{ limit }} caractères.'
+    )]
     private ?string $description = null;
 
     #[ORM\Column]
