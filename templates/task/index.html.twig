@@ -20,10 +20,12 @@
             {% for task in tasks %}
                 <li>
                     <strong>{{ task.title }}</strong>
+
                     {% if task.description %}
                         <br>
                         {{ task.description }}
                     {% endif %}
+
                     <br>
                     Statut :
                     {% if task.isDone %}
@@ -31,8 +33,19 @@
                     {% else %}
                         En cours
                     {% endif %}
+
                     <br>
                     Créée le : {{ task.createdAt|date('d/m/Y H:i') }}
+
+                    <br>
+                    <a href="{{ path('app_task_show', {id: task.id}) }}">Voir</a>
+                    |
+                    <a href="{{ path('app_task_edit', {id: task.id}) }}">Modifier</a>
+
+                    <form method="post" action="{{ path('app_task_delete', {id: task.id}) }}" style="display:inline;" onsubmit="return confirm('Supprimer cette tâche ?');">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete_task_' ~ task.id) }}">
+                        <button type="submit">Supprimer</button>
+                    </form>
                 </li>
             {% endfor %}
         </ul>

@@ -44,4 +44,65 @@ final class TaskController extends AbstractController
             'form' => $form,
         ]);
     }
+
+    #[Route('/tasks/{id}', name: 'app_task_show', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function show(int $id, TaskRepository $taskRepository): Response
+    {
+        $task = $taskRepository->find($id);
+
+        if (!$task) {
+            throw $this->createNotFoundException('Tâche introuvable.');
+        }
+
+        return $this->render('task/show.html.twig', [
+            'task' => $task,
+        ]);
+    }
+
+    #[Route('/tasks/{id}/edit', name: 'app_task_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
+    public function edit(int $id, Request $request, TaskRepository $taskRepository, EntityManagerInterface $entityManager): Response
+    {
+        $task = $taskRepository->find($id);
+
+        if (!$task) {
+            throw $this->createNotFoundException('Tâche introuvable.');
+        }
+
+        $form = $this->createForm(TaskType::class, $task);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            $this->addFlash('success', 'La tâche a bien été modifiée.');
+
+            return $this->redirectToRoute('app_task_index');
+        }
+
+        return $this->render('task/edit.html.twig', [
+            'task' => $task,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/tasks/{id}', name: 'app_task_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function delete(int $id, Request $request, TaskRepository $taskRepository, EntityManagerInterface $entityManager): Response
+    {
+        $task = $taskRepository->find($id);
+
+        if (!$task) {
+            throw $this->createNotFoundException('Tâche introuvable.');
+        }
+
+        if (!$this->isCsrfTokenValid('delete_task_'.$task->getId(), (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Jeton CSRF invalide.');
+        }
+
+        $entityManager->remove($task);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'La tâche a bien été supprimée.');
+
+        return $this->redirectToRoute('app_task_index');
+    }
 }
