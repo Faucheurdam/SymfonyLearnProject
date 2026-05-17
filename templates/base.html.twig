@@ -162,6 +162,13 @@
             <nav>
                 <a href="{{ path('app_task_index') }}">Liste des tâches</a>
                 <a href="{{ path('app_task_new') }}">Créer une tâche</a>
+
+                {% if app.user %}
+                    <span>Connecté : {{ app.user.userIdentifier }}</span>
+                    <a href="{{ path('app_logout') }}">Déconnexion</a>
+                {% else %}
+                    <a href="{{ path('app_login') }}">Connexion</a>
+                {% endif %}
             </nav>
         </header>
 
