@@ -3,60 +3,51 @@
 {% block title %}Liste des tâches{% endblock %}
 
 {% block body %}
-    {% for message in app.flashes('success') %}
-        <div>{{ message }}</div>
-    {% endfor %}
-
     <h1>Liste des tâches</h1>
-
-    <p>
-        <a href="{{ path('app_task_new') }}">Créer une tâche</a>
-    </p>
 
     {% if tasks is empty %}
         <p>Aucune tâche pour le moment.</p>
     {% else %}
-        <ul>
+        <ul class="task-list">
             {% for task in tasks %}
-                <li>
+                <li class="task-item">
                     <strong>{{ task.title }}</strong>
 
                     {% if task.description %}
+                        <p>{{ task.description }}</p>
+                    {% endif %}
+
+                    <div class="task-meta">
+                        Statut :
+                        {% if task.isDone %}
+                            <span class="status-done">Terminée</span>
+                        {% else %}
+                            <span class="status-pending">En cours</span>
+                        {% endif %}
                         <br>
-                        {{ task.description }}
-                    {% endif %}
+                        Créée le : {{ task.createdAt|date('d/m/Y H:i') }}
+                    </div>
 
-                    <br>
-                    Statut :
-                    {% if task.isDone %}
-                        Terminée
-                    {% else %}
-                        En cours
-                    {% endif %}
+                    <div class="task-actions">
+                        <a href="{{ path('app_task_show', {id: task.id}) }}">Voir</a>
+                        <a href="{{ path('app_task_edit', {id: task.id}) }}">Modifier</a>
 
-                    <form method="post" action="{{ path('app_task_toggle', {id: task.id}) }}" style="display:inline;">
-                        <input type="hidden" name="_token" value="{{ csrf_token('toggle_task_' ~ task.id) }}">
-                        <button type="submit">
-                            {% if task.isDone %}
-                                Marquer comme en cours
-                            {% else %}
-                                Marquer comme terminée
-                            {% endif %}
-                        </button>
-                    </form>
+                        <form method="post" action="{{ path('app_task_toggle', {id: task.id}) }}" class="inline-form">
+                            <input type="hidden" name="_token" value="{{ csrf_token('toggle_task_' ~ task.id) }}">
+                            <button type="submit" class="link-button">
+                                {% if task.isDone %}
+                                    Marquer comme en cours
+                                {% else %}
+                                    Marquer comme terminée
+                                {% endif %}
+                            </button>
+                        </form>
 
-                    <br>
-                    Créée le : {{ task.createdAt|date('d/m/Y H:i') }}
-
-                    <br>
-                    <a href="{{ path('app_task_show', {id: task.id}) }}">Voir</a>
-                    |
-                    <a href="{{ path('app_task_edit', {id: task.id}) }}">Modifier</a>
-
-                    <form method="post" action="{{ path('app_task_delete', {id: task.id}) }}" style="display:inline;" onsubmit="return confirm('Supprimer cette tâche ?');">
-                        <input type="hidden" name="_token" value="{{ csrf_token('delete_task_' ~ task.id) }}">
-                        <button type="submit">Supprimer</button>
-                    </form>
+                        <form method="post" action="{{ path('app_task_delete', {id: task.id}) }}" class="inline-form" onsubmit="return confirm('Supprimer cette tâche ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_task_' ~ task.id) }}">
+                            <button type="submit">Supprimer</button>
+                        </form>
+                    </div>
                 </li>
             {% endfor %}
         </ul>

@@ -1,24 +1,180 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
     <head>
         <meta charset="UTF-8">
-        <title>{% block title %}Welcome!{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        <title>{% block title %}Symfony Learn Project{% endblock %}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
         {% block stylesheets %}
-        {% endblock %}
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    background: #f5f7fb;
+                    color: #222;
+                }
 
-        {% block javascripts %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
-        {% endblock %}
+                header {
+                    background: #1f2937;
+                    color: white;
+                    padding: 1rem 2rem;
+                }
 
-        {% set frankenphpHotReload = app.request.server.get('FRANKENPHP_HOT_RELOAD') %}
-        {% if frankenphpHotReload %}
-        <meta name="frankenphp-hot-reload:url" content="{{ frankenphpHotReload }}">
-        <script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
-        <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
-        {% endif %}
+                header h1 {
+                    margin: 0;
+                    font-size: 1.4rem;
+                }
+
+                nav {
+                    margin-top: 0.5rem;
+                }
+
+                nav a {
+                    color: white;
+                    text-decoration: none;
+                    margin-right: 1rem;
+                }
+
+                nav a:hover {
+                    text-decoration: underline;
+                }
+
+                main {
+                    max-width: 900px;
+                    margin: 2rem auto;
+                    background: white;
+                    padding: 2rem;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+                }
+
+                h1 {
+                    margin-top: 0;
+                }
+
+                .flash-success {
+                    background: #dcfce7;
+                    border: 1px solid #86efac;
+                    color: #166534;
+                    padding: 0.75rem 1rem;
+                    border-radius: 6px;
+                    margin-bottom: 1rem;
+                }
+
+                .flash-error {
+                    background: #fee2e2;
+                    border: 1px solid #fca5a5;
+                    color: #991b1b;
+                    padding: 0.75rem 1rem;
+                    border-radius: 6px;
+                    margin-bottom: 1rem;
+                }
+
+                .task-list {
+                    list-style: none;
+                    padding: 0;
+                }
+
+                .task-item {
+                    border: 1px solid #ddd;
+                    border-radius: 6px;
+                    padding: 1rem;
+                    margin-bottom: 1rem;
+                    background: #fafafa;
+                }
+
+                .task-meta {
+                    color: #555;
+                    font-size: 0.95rem;
+                    margin-top: 0.5rem;
+                }
+
+                .task-actions {
+                    margin-top: 1rem;
+                }
+
+                .task-actions a,
+                .task-actions button {
+                    margin-right: 0.5rem;
+                }
+
+                .status-done {
+                    color: #15803d;
+                    font-weight: bold;
+                }
+
+                .status-pending {
+                    color: #b45309;
+                    font-weight: bold;
+                }
+
+                form {
+                    margin-top: 1rem;
+                }
+
+                label {
+                    display: block;
+                    margin-bottom: 0.25rem;
+                    font-weight: bold;
+                }
+
+                input[type="text"],
+                textarea {
+                    width: 100%;
+                    padding: 0.6rem;
+                    border: 1px solid #ccc;
+                    border-radius: 6px;
+                    box-sizing: border-box;
+                    margin-bottom: 1rem;
+                }
+
+                button {
+                    padding: 0.6rem 1rem;
+                    border: none;
+                    border-radius: 6px;
+                    background: #2563eb;
+                    color: white;
+                    cursor: pointer;
+                }
+
+                button:hover {
+                    background: #1d4ed8;
+                }
+
+                .inline-form {
+                    display: inline;
+                }
+
+                .link-button {
+                    background: #6b7280;
+                }
+
+                .link-button:hover {
+                    background: #4b5563;
+                }
+            </style>
+        {% endblock %}
     </head>
     <body>
-        {% block body %}{% endblock %}
+        <header>
+            <h1>Symfony Learn Project</h1>
+
+            <nav>
+                <a href="{{ path('app_task_index') }}">Liste des tâches</a>
+                <a href="{{ path('app_task_new') }}">Créer une tâche</a>
+            </nav>
+        </header>
+
+        <main>
+            {% for message in app.flashes('success') %}
+                <div class="flash-success">{{ message }}</div>
+            {% endfor %}
+
+            {% for message in app.flashes('error') %}
+                <div class="flash-error">{{ message }}</div>
+            {% endfor %}
+
+            {% block body %}{% endblock %}
+        </main>
     </body>
 </html>

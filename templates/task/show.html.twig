@@ -15,15 +15,22 @@
     <p>
         <strong>Statut :</strong>
         {% if task.isDone %}
-            Terminée
+            <span class="status-done">Terminée</span>
         {% else %}
-            En cours
+            <span class="status-pending">En cours</span>
         {% endif %}
     </p>
 
+    <p><strong>Créée le :</strong> {{ task.createdAt|date('d/m/Y H:i') }}</p>
+
+    <div class="task-actions">
+        <a href="{{ path('app_task_edit', {id: task.id}) }}">Modifier</a>
+        <a href="{{ path('app_task_index') }}">Retour à la liste</a>
+    </div>
+
     <form method="post" action="{{ path('app_task_toggle', {id: task.id}) }}">
         <input type="hidden" name="_token" value="{{ csrf_token('toggle_task_' ~ task.id) }}">
-        <button type="submit">
+        <button type="submit" class="link-button">
             {% if task.isDone %}
                 Marquer comme en cours
             {% else %}
@@ -31,13 +38,6 @@
             {% endif %}
         </button>
     </form>
-
-    <p><strong>Créée le :</strong> {{ task.createdAt|date('d/m/Y H:i') }}</p>
-
-    <p>
-        <a href="{{ path('app_task_index') }}">Retour à la liste</a> |
-        <a href="{{ path('app_task_edit', {id: task.id}) }}">Modifier</a>
-    </p>
 
     <form method="post" action="{{ path('app_task_delete', {id: task.id}) }}" onsubmit="return confirm('Supprimer cette tâche ?');">
         <input type="hidden" name="_token" value="{{ csrf_token('delete_task_' ~ task.id) }}">
