@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Task;
+use App\Entity\User;
 use App\Form\TaskType;
 use App\Repository\TaskRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -16,7 +17,16 @@ final class TaskController extends AbstractController
     #[Route('/tasks', name: 'app_task_index')]
     public function index(TaskRepository $taskRepository): Response
     {
-        $tasks = $taskRepository->findBy([], ['createdAt' => 'DESC']);
+        $user = $this->getUser();
+
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $tasks = $taskRepository->findBy(
+            ['owner' => $user],
+            ['createdAt' => 'DESC']
+        );
 
         return $this->render('task/index.html.twig', [
             'tasks' => $tasks,
@@ -26,7 +36,14 @@ final class TaskController extends AbstractController
     #[Route('/tasks/new', name: 'app_task_new')]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+        $user = $this->getUser();
+
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
+
         $task = new Task();
+        $task->setOwner($user);
 
         $form = $this->createForm(TaskType::class, $task);
         $form->handleRequest($request);
@@ -54,6 +71,8 @@ final class TaskController extends AbstractController
             throw $this->createNotFoundException('Tâche introuvable.');
         }
 
+        $this->denyAccessUnlessTaskOwner($task);
+
         return $this->render('task/show.html.twig', [
             'task' => $task,
         ]);
@@ -67,6 +86,8 @@ final class TaskController extends AbstractController
         if (!$task) {
             throw $this->createNotFoundException('Tâche introuvable.');
         }
+
+        $this->denyAccessUnlessTaskOwner($task);
 
         $form = $this->createForm(TaskType::class, $task);
         $form->handleRequest($request);
@@ -85,6 +106,29 @@ final class TaskController extends AbstractController
         ]);
     }
 
+    #[Route('/tasks/{id}/toggle', name: 'app_task_toggle', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function toggle(int $id, Request $request, TaskRepository $taskRepository, EntityManagerInterface $entityManager): Response
+    {
+        $task = $taskRepository->find($id);
+
+        if (!$task) {
+            throw $this->createNotFoundException('Tâche introuvable.');
+        }
+
+        $this->denyAccessUnlessTaskOwner($task);
+
+        if (!$this->isCsrfTokenValid('toggle_task_'.$task->getId(), (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Jeton CSRF invalide.');
+        }
+
+        $task->setIsDone(!$task->isDone());
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Le statut de la tâche a bien été mis à jour.');
+
+        return $this->redirectToRoute('app_task_index');
+    }
+
     #[Route('/tasks/{id}', name: 'app_task_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function delete(int $id, Request $request, TaskRepository $taskRepository, EntityManagerInterface $entityManager): Response
     {
@@ -93,6 +137,8 @@ final class TaskController extends AbstractController
         if (!$task) {
             throw $this->createNotFoundException('Tâche introuvable.');
         }
+
+        $this->denyAccessUnlessTaskOwner($task);
 
         if (!$this->isCsrfTokenValid('delete_task_'.$task->getId(), (string) $request->request->get('_token'))) {
             throw $this->createAccessDeniedException('Jeton CSRF invalide.');
@@ -106,24 +152,12 @@ final class TaskController extends AbstractController
         return $this->redirectToRoute('app_task_index');
     }
 
-    #[Route('/tasks/{id}/toggle', name: 'app_task_toggle', requirements: ['id' => '\d+'], methods: ['POST'])]
-    public function toggle(int $id, Request $request, TaskRepository $taskRepository, EntityManagerInterface $entityManager): Response
+    private function denyAccessUnlessTaskOwner(Task $task): void
     {
-        $task = $taskRepository->find($id);
+        $user = $this->getUser();
 
-        if (!$task) {
-            throw $this->createNotFoundException('Tâche introuvable.');
+        if (!$user instanceof User || $task->getOwner()?->getId() !== $user->getId()) {
+            throw $this->createAccessDeniedException('Vous ne pouvez pas accéder à cette tâche.');
         }
-
-        if (!$this->isCsrfTokenValid('toggle_task_'.$task->getId(), (string) $request->request->get('_token'))) {
-            throw $this->createAccessDeniedException('Jeton CSRF invalide.');
-        }
-
-        $task->setIsDone(!$task->isDone());
-        $entityManager->flush();
-
-        $this->addFlash('success', 'Le statut de la tâche a bien été mis à jour.');
-
-        return $this->redirectToRoute('app_task_index');
     }
 }

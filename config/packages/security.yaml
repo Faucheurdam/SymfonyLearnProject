@@ -25,5 +25,6 @@ security:
                 target: app_task_index
 
     access_control:
-        # Pour l’instant, on ne bloque encore rien.
-        # On protégera les tâches à l’étape suivante.
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/register, roles: PUBLIC_ACCESS }
+        - { path: ^/tasks, roles: ROLE_USER }
